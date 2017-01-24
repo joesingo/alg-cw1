@@ -1,2 +1,3 @@
-default:
-	gcc -o sorting_test sorting_test.c
+files = data_gen.c sorting_test.c sorting.c
+default: $(files)
+	gcc -o sorting_test $(files)

@@ -1,11 +1,11 @@
 /*
  * Perform an in-place insertion sort of the array provided
  */
-void insertion_sort(float **array, int size) {
-    float *list = *array;
+void insertion_sort(int **array, int size) {
+    int *list = *array;
 
     for (int i=1; i<size; i++) {
-        float item = list[i];
+        int item = list[i];
         int j = i - 1;
 
         while (j >= 0 && list[j] > item) {
@@ -15,4 +15,3 @@ void insertion_sort(float **array, int size) {
         list[j + 1] = item;
     }
 }
-

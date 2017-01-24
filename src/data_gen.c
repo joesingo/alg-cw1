@@ -4,23 +4,23 @@
 #include "sorting.h"
 
 /*
- * Return a random number in the range [min, max]
+ * Return a random integer in the range [min, max]
  */
-float random_number(int min, int max) {
+int random_number(int min, int max) {
     float r = (float) random() / RAND_MAX;  // r will be a rand float in [0, 1]
-    return min + (max - min) * r;
+    return (int) (min + (max - min) * r);
 }
 
 
 /*
  * Reverse an array of floats in place
  */
-void reverse_array(float **array, int size) {
-    float *list = *array;
+void reverse_array(int **array, int size) {
+    int *list = *array;
 
     for (int i=0; i<size / 2; i++) {
         int j = size - 1 - i;
-        float temp = list[i];
+        int temp = list[i];
         list[i] = list[j];
         list[j] = temp;
     }
@@ -31,8 +31,8 @@ void reverse_array(float **array, int size) {
  * Return a pointer to an array of random numbers according to the parameters
  * provided
  */
-float *generate_data(DataGeneratorParams params, int size) {
-    float *list = malloc(size * sizeof(float));
+int *generate_data(DataGeneratorParams params, int size) {
+    int *list = malloc(size * sizeof(int));
 
     // Create random number between the min and max values provided
     for (int i=0; i<size; i++) {

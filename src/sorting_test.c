@@ -96,7 +96,7 @@ void main(int argc, char **argv) {
     params.max = 100;
     params.ordering = RANDOM;
 
-    void (*sorting_func)(float**, int);  // function pointer
+    void (*sorting_func)(int**, int);  // function pointer
 
     // Set sorting_func and data gen params according to chosen algorithm
     switch (alg) {
@@ -131,7 +131,7 @@ void main(int argc, char **argv) {
 
         for (int j=0; j<NO_OF_TESTS; j++) {
 
-            float *list = generate_data(params, sizes[i]);
+            int *list = generate_data(params, sizes[i]);
 
             for (int k=0; k<TEST_REPETITIONS; k++) {
                 clock_t start = clock();

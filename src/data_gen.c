@@ -26,26 +26,23 @@ void reverse_array(int *list, int size) {
 
 
 /*
- * Return a pointer to an array of random numbers according to the parameters
- * provided
+ * Populate the destination array with random numbers according to the
+ * parameters provided
  */
-int *generate_data(DataGeneratorParams params, int size) {
-    int *list = malloc(size * sizeof(int));
+void generate_data(int *dest, DataGeneratorParams params, int size) {
 
-    // Create random number between the min and max values provided
+    // Create random numbers between the min and max values provided
     for (int i=0; i<size; i++) {
-        list[i] = random_number(params.min, params.max);
+        dest[i] = random_number(params.min, params.max);
     }
 
     if (params.ordering == SORTED || params.ordering == REVERSE_SORTED) {
 
         // If the data is to be (reverse) sorted then use insertion sort
-        insertion_sort(list, size);
+        insertion_sort(dest, size);
 
         if (params.ordering == REVERSE_SORTED) {
-            reverse_array(list, size);
+            reverse_array(dest, size);
         }
     }
-
-    return list;
 }

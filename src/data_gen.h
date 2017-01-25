@@ -21,6 +21,6 @@ typedef struct {
     Ordering ordering;
 } DataGeneratorParams;
 
-int *generate_data(DataGeneratorParams params, int size);
+void generate_data(int *dest, DataGeneratorParams params, int size);
 
 #endif

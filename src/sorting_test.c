@@ -137,22 +137,21 @@ void main(int argc, char **argv) {
 
         for (int j=0; j<NO_OF_TESTS; j++) {
 
-            int *list = generate_data(params, sizes[i]);
+            int list[sizes[i]];
+            generate_data(list, params, sizes[i]);
 
-            printf("List to sort is:\n");
-            print_list(list, sizes[i]);
+            // printf("List to sort is:\n");
+            // print_list(list, sizes[i]);
 
             clock_t start = clock();
             (*sorting_func)(list, sizes[i]);
             clock_t end = clock();
             total_time += (double)(end - start) / CLOCKS_PER_SEC;
 
-            printf("Sorted list is:\n");
-            print_list(list, sizes[i]);
+            // printf("Sorted list is:\n");
+            // print_list(list, sizes[i]);
 
-            free(list);
-
-            printf("--\n");
+            // printf("--\n");
         }
 
         double time_taken = total_time / NO_OF_TESTS;

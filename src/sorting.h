@@ -7,5 +7,6 @@ typedef enum {
 } SortingAlgorithm;
 
 void insertion_sort(int *list, int size);
+void counting_sort(int *list, int *output, int size, int max_value);
 
 #endif

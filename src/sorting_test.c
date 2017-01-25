@@ -98,18 +98,14 @@ void main(int argc, char **argv) {
 
     // Set data gen parameters to default values
     DataGeneratorParams params;
-    params.min = 1;
+    params.min = 0;
     params.max = 100;
     params.ordering = RANDOM;
 
-    void (*sorting_func)(int*, int);  // function pointer
-
-    // Set sorting_func and data gen params according to chosen algorithm
+    // Set data gen params according to chosen algorithm
     switch (alg) {
 
         case INSERTION_SORT:
-            sorting_func = &insertion_sort;
-
             if (scenario == BEST_CASE) {
                 params.ordering = SORTED;
             }
@@ -119,8 +115,11 @@ void main(int argc, char **argv) {
             break;
 
         case COUNTING_SORT:
-            print_error("Counting sort is not implemented yet");
-            exit(1);
+            if (scenario == AVERAGE_CASE) {
+                print_error("Invalid scenario for counting sort - please choose " \
+                            "'best' or 'worst'");
+                exit(1);
+            }
             break;
     }
 
@@ -137,6 +136,22 @@ void main(int argc, char **argv) {
 
         for (int j=0; j<NO_OF_TESTS; j++) {
 
+            // If using counting sort then adjust the max value to be generated
+            // according to best/worst case scenario
+            if (alg == COUNTING_SORT) {
+
+                if (scenario == BEST_CASE) {
+                    // Good performance when k = n
+                    params.max = sizes[i];
+                }
+
+                else if (scenario == WORST_CASE) {
+                    // Bad performance is when k is significantly larger than n,
+                    // e.g. n^2
+                    params.max = sizes[i] * sizes[i];
+                }
+            }
+
             int list[sizes[i]];
             generate_data(list, params, sizes[i]);
 
@@ -145,9 +160,21 @@ void main(int argc, char **argv) {
             print_list(list, sizes[i]);
             #endif
 
-            clock_t start = clock();
-            (*sorting_func)(list, sizes[i]);
-            clock_t end = clock();
+            clock_t start;
+            clock_t end;
+
+            if (alg == INSERTION_SORT) {
+                start = clock();
+                insertion_sort(list, sizes[i]);
+                end = clock();
+            }
+            else if (alg == COUNTING_SORT) {
+                int output[sizes[i]];
+                start = clock();
+                counting_sort(list, output, sizes[i], params.max);
+                end = clock();
+            }
+
             total_time += (double)(end - start) / CLOCKS_PER_SEC;
 
             #ifdef DEBUG

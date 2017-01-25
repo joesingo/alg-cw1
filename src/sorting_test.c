@@ -7,7 +7,6 @@
 #include "data_gen.h"
 
 int NO_OF_TESTS = 30;
-int TEST_REPETITIONS = 3;
 
 int START_SIZE = 100;
 int SIZE_STEP = 100;
@@ -82,6 +81,13 @@ void get_args(int argc, char **argv, Scenario *scenario, SortingAlgorithm *alg) 
 
 }
 
+void print_list(int *list, int size) {
+    for (int i=0; i<size; i++) {
+        printf("%d, ", list[i]);
+    }
+    printf("\n");
+}
+
 void main(int argc, char **argv) {
     srandom(time(NULL));
     PROGRAM_NAME = "sorting_test";
@@ -133,17 +139,23 @@ void main(int argc, char **argv) {
 
             int *list = generate_data(params, sizes[i]);
 
-            for (int k=0; k<TEST_REPETITIONS; k++) {
-                clock_t start = clock();
-                (*sorting_func)(&list, sizes[i]);
-                clock_t end = clock();
-                total_time += (double)(end - start) / CLOCKS_PER_SEC;
-            }
+            printf("List to sort is:\n");
+            print_list(list, sizes[i]);
+
+            clock_t start = clock();
+            (*sorting_func)(&list, sizes[i]);
+            clock_t end = clock();
+            total_time += (double)(end - start) / CLOCKS_PER_SEC;
+
+            printf("Sorted list is:\n");
+            print_list(list, sizes[i]);
 
             free(list);
+
+            printf("--\n");
         }
 
-        double time_taken = total_time / (NO_OF_TESTS * TEST_REPETITIONS);
+        double time_taken = total_time / NO_OF_TESTS;
         printf("%d,%f\n", sizes[i], time_taken);
     }
 }

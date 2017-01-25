@@ -1,3 +1,7 @@
 files = src/data_gen.c src/sorting_test.c src/sorting.c
+exec_name = sorting_test
 default: $(files)
-	gcc -o sorting_test $(files)
+	gcc -o $(exec_name) $(files)
+
+debug: $(files)
+	gcc -o $(exec_name) -D DEBUG $(files)

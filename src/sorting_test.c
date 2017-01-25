@@ -140,18 +140,22 @@ void main(int argc, char **argv) {
             int list[sizes[i]];
             generate_data(list, params, sizes[i]);
 
-            // printf("List to sort is:\n");
-            // print_list(list, sizes[i]);
+            #ifdef DEBUG
+            printf("List to sort is:\n");
+            print_list(list, sizes[i]);
+            #endif
 
             clock_t start = clock();
             (*sorting_func)(list, sizes[i]);
             clock_t end = clock();
             total_time += (double)(end - start) / CLOCKS_PER_SEC;
 
-            // printf("Sorted list is:\n");
-            // print_list(list, sizes[i]);
+            #ifdef DEBUG
+            printf("Sorted list is:\n");
+            print_list(list, sizes[i]);
 
-            // printf("--\n");
+            printf("--\n");
+            #endif
         }
 
         double time_taken = total_time / NO_OF_TESTS;

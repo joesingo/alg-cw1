@@ -13,11 +13,9 @@ int random_number(int min, int max) {
 
 
 /*
- * Reverse an array of floats in place
+ * Reverse an array of ints in place
  */
-void reverse_array(int **array, int size) {
-    int *list = *array;
-
+void reverse_array(int *list, int size) {
     for (int i=0; i<size / 2; i++) {
         int j = size - 1 - i;
         int temp = list[i];
@@ -42,10 +40,10 @@ int *generate_data(DataGeneratorParams params, int size) {
     if (params.ordering == SORTED || params.ordering == REVERSE_SORTED) {
 
         // If the data is to be (reverse) sorted then use insertion sort
-        insertion_sort(&list, size);
+        insertion_sort(list, size);
 
         if (params.ordering == REVERSE_SORTED) {
-            reverse_array(&list, size);
+            reverse_array(list, size);
         }
     }
 

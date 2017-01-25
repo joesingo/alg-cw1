@@ -102,7 +102,7 @@ void main(int argc, char **argv) {
     params.max = 100;
     params.ordering = RANDOM;
 
-    void (*sorting_func)(int**, int);  // function pointer
+    void (*sorting_func)(int*, int);  // function pointer
 
     // Set sorting_func and data gen params according to chosen algorithm
     switch (alg) {
@@ -143,7 +143,7 @@ void main(int argc, char **argv) {
             print_list(list, sizes[i]);
 
             clock_t start = clock();
-            (*sorting_func)(&list, sizes[i]);
+            (*sorting_func)(list, sizes[i]);
             clock_t end = clock();
             total_time += (double)(end - start) / CLOCKS_PER_SEC;
 

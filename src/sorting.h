@@ -6,6 +6,6 @@ typedef enum {
     COUNTING_SORT
 } SortingAlgorithm;
 
-void insertion_sort(int **array, int size);
+void insertion_sort(int *list, int size);
 
 #endif

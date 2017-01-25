@@ -1,9 +1,7 @@
 /*
  * Perform an in-place insertion sort of the array provided
  */
-void insertion_sort(int **array, int size) {
-    int *list = *array;
-
+void insertion_sort(int *list, int size) {
     for (int i=1; i<size; i++) {
         int item = list[i];
         int j = i - 1;

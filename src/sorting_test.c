@@ -6,11 +6,8 @@
 #include "sorting.h"
 #include "data_gen.h"
 
-int NO_OF_TESTS = 30;
-
-int START_SIZE = 100;
-int SIZE_STEP = 100;
-int NUM_SIZES = 30;
+// The number of times to sort the data for each array size
+int NO_OF_TESTS = 50;
 
 char *PROGRAM_NAME;
 
@@ -34,17 +31,40 @@ void print_error(char *message) {
  * Print usage text to stdout
  */
 void print_usage() {
-    printf("Usage: %s (insertion | counting) (best | worst | average)\n",
-           PROGRAM_NAME);
+    printf("Usage: %s (insertion | counting) (best | worst | average) " \
+           "<start size> <step> <no. of data points>\n", PROGRAM_NAME);
+}
+
+/*
+ * Convert str to an int and exit with the error message provided if str is
+ * invalid
+ */
+int read_pos_integer(char *str, char *e_message) {
+    char *endptr;  // Points to first invalid character
+    int i = strtol(str, &endptr, 10);
+
+    if (endptr == str) {
+        // If first character is invalid then we have no number, so error
+        print_error(e_message);
+        exit(1);
+    }
+    else if (i <= 0) {
+        print_error(e_message);
+        exit(1);
+    }
+
+    return i;
 }
 
 /*
  * Validate the provided command line arguments and set the scenario and
  * algorithm using the pointers provided
  */
-void get_args(int argc, char **argv, Scenario *scenario, SortingAlgorithm *alg) {
+void get_args(int argc, char **argv, Scenario *scenario, SortingAlgorithm *alg,
+              int *start_size, int *step_size, int *num_sizes) {
+
     // Check the correct number of arguments have been provided
-    if (argc < 3) {
+    if (argc < 6) {
         print_error("Invalid arguments");
         print_usage();
         exit(1);
@@ -79,6 +99,9 @@ void get_args(int argc, char **argv, Scenario *scenario, SortingAlgorithm *alg) 
         exit(1);
     }
 
+    *start_size = read_pos_integer(argv[3], "Invalid start size");
+    *step_size = read_pos_integer(argv[4], "Invalid step size");
+    *num_sizes = read_pos_integer(argv[5], "Invalid number of sizes");
 }
 
 void print_list(int *list, int size) {
@@ -94,7 +117,10 @@ void main(int argc, char **argv) {
 
     Scenario scenario;
     SortingAlgorithm alg;
-    get_args(argc, argv, &scenario, &alg);
+
+    int start_size, step_size, num_sizes;
+
+    get_args(argc, argv, &scenario, &alg, &start_size, &step_size, &num_sizes);
 
     // Set data gen parameters to default values
     DataGeneratorParams params;
@@ -124,13 +150,13 @@ void main(int argc, char **argv) {
     }
 
     // Caclulate the array sizes to use based on the values defined above
-    int sizes[NUM_SIZES];
-    for (int i=0; i<NUM_SIZES; i++) {
-        sizes[i] = START_SIZE + i * SIZE_STEP;
+    int sizes[num_sizes];
+    for (int i=0; i<num_sizes; i++) {
+        sizes[i] = start_size + i * step_size;
     }
 
     // Perform the actual test
-    for (int i=0; i<NUM_SIZES; i++) {
+    for (int i=0; i<num_sizes; i++) {
 
         double total_time = 0;
 

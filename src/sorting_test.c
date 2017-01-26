@@ -5,11 +5,10 @@
 
 #include "sorting.h"
 #include "data_gen.h"
+#include "error.h"
 
 // The number of times to sort the data for each array size
 int NO_OF_TESTS = 50;
-
-char *PROGRAM_NAME;
 
 /*
  * An enum to hold the different scenarios for performing the test
@@ -20,19 +19,20 @@ typedef enum {
     AVERAGE_CASE
 } Scenario;
 
-/*
- * Print an error message on stderr
- */
-void print_error(char *message) {
-    fprintf(stderr, "%s: %s\n", PROGRAM_NAME, message);
-}
 
 /*
- * Print usage text to stdout
+ * Return a pointer to an array of ints of a given size, and show an error
+ * message and quit if memory could not be allocated
  */
-void print_usage() {
-    printf("Usage: %s (insertion | counting) (best | worst | average) " \
-           "<start size> <step> <no. of data points>\n", PROGRAM_NAME);
+int *create_array(int size) {
+    int *p = malloc(size * sizeof(int));
+
+    if (size != 0 && p == NULL) {
+        print_error("Failed to allocate memory");
+        exit(1);
+    }
+
+    return p;
 }
 
 /*
@@ -113,7 +113,6 @@ void print_list(int *list, int size) {
 
 void main(int argc, char **argv) {
     srandom(time(NULL));
-    PROGRAM_NAME = "sorting_test";
 
     Scenario scenario;
     SortingAlgorithm alg;
@@ -178,7 +177,7 @@ void main(int argc, char **argv) {
                 }
             }
 
-            int list[sizes[i]];
+            int *list = create_array(sizes[i]);
             generate_data(list, params, sizes[i]);
 
             #ifdef DEBUG
@@ -195,10 +194,13 @@ void main(int argc, char **argv) {
                 end = clock();
             }
             else if (alg == COUNTING_SORT) {
-                int output[sizes[i]];
+                int *output = create_array(sizes[i]);
+
                 start = clock();
                 counting_sort(list, output, sizes[i], params.max);
                 end = clock();
+
+                free(output);
             }
 
             total_time += (double)(end - start) / CLOCKS_PER_SEC;
@@ -209,6 +211,8 @@ void main(int argc, char **argv) {
 
             printf("--\n");
             #endif
+
+            free(list);
         }
 
         double time_taken = total_time / NO_OF_TESTS;

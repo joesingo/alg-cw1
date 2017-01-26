@@ -1,3 +1,7 @@
+#include <stdlib.h>
+
+#include "sorting_test.h"
+
 /*
  * Perform an in-place insertion sort of the array provided
  */
@@ -18,7 +22,7 @@ void insertion_sort(int *list, int size) {
  * Perform counting sort on list and put the result in output
  */
 void counting_sort(int *list, int *output, int size, int max_value) {
-    int count_array[max_value + 1];
+    int *count_array = create_array(max_value + 1);
 
     // Initialise count array to 0s
     for (int i=0; i<=max_value; i++) {
@@ -43,4 +47,6 @@ void counting_sort(int *list, int *output, int size, int max_value) {
         // more than once in the list
         count_array[list[j]]--;
     }
+
+    free(count_array);
 }

@@ -22,7 +22,8 @@ typedef enum {
 
 /*
  * Return a pointer to an array of ints of a given size, and show an error
- * message and quit if memory could not be allocated
+ * message and quit if memory could not be allocated. REMEMBER TO FREE MEMORY
+ * ONCE FINISHED WHEN USING THIS FUNCTION
  */
 int *create_array(int size) {
     int *p = malloc(size * sizeof(int));
@@ -57,8 +58,8 @@ int read_pos_integer(char *str, char *e_message) {
 }
 
 /*
- * Validate the provided command line arguments and set the scenario and
- * algorithm using the pointers provided
+ * Validate the provided command line arguments and set the scenario, algorithm,
+ * start size, step size, and no. of data points
  */
 void get_args(int argc, char **argv, Scenario *scenario, SortingAlgorithm *alg,
               int *start_size, int *step_size, int *num_sizes) {
@@ -104,21 +105,26 @@ void get_args(int argc, char **argv, Scenario *scenario, SortingAlgorithm *alg,
     *num_sizes = read_pos_integer(argv[5], "Invalid number of sizes");
 }
 
+/*
+ * Print an array of integers to stdout (for debugging/testing purposes)
+ */
 void print_list(int *list, int size) {
     for (int i=0; i<size; i++) {
-        printf("%d, ", list[i]);
+        printf("%d", list[i]);
+
+        if (i + 1 < size) {
+            printf(", ");
+        }
     }
     printf("\n");
 }
 
-void main(int argc, char **argv) {
+int main(int argc, char **argv) {
     srandom(time(NULL));
 
     Scenario scenario;
     SortingAlgorithm alg;
-
     int start_size, step_size, num_sizes;
-
     get_args(argc, argv, &scenario, &alg, &start_size, &step_size, &num_sizes);
 
     // Set data gen parameters to default values
@@ -159,6 +165,8 @@ void main(int argc, char **argv) {
 
         double total_time = 0;
 
+        // For each array size perform the test NO_OF_TESTS times, then
+        // calculate the average time taken
         for (int j=0; j<NO_OF_TESTS; j++) {
 
             // If using counting sort then adjust the max value to be generated
@@ -172,7 +180,8 @@ void main(int argc, char **argv) {
 
                 else if (scenario == WORST_CASE) {
                     // Bad performance is when k is significantly larger than n,
-                    // e.g. n^2
+                    // e.g. n^2. Note that we could also choose n^3, 2^n, n!
+                    // etc to get even worse performance
                     params.max = sizes[i] * sizes[i];
                 }
             }
@@ -203,6 +212,9 @@ void main(int argc, char **argv) {
                 free(output);
             }
 
+            // clock() returns the processor time used so far, so divide the
+            // difference between end and start by CLOCKS_PER_SEC to convert to
+            // seconds
             total_time += (double)(end - start) / CLOCKS_PER_SEC;
 
             #ifdef DEBUG
@@ -215,7 +227,10 @@ void main(int argc, char **argv) {
             free(list);
         }
 
+        // Print out the array size and average time taken in CSV format
         double time_taken = total_time / NO_OF_TESTS;
         printf("%d,%f\n", sizes[i], time_taken);
     }
+
+    return 0;
 }

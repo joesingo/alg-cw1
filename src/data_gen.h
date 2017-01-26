@@ -13,7 +13,7 @@ typedef enum {
 
 
 /*
- * A struct to hold parameters to be passed to generate_data() below
+ * A struct to hold parameters to be passed to generate_data()
  */
 typedef struct {
     int min;

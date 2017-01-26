@@ -10,10 +10,19 @@ void insertion_sort(int *list, int size) {
         int item = list[i];
         int j = i - 1;
 
+        // Step backwards through the list starting from index i - 1 until we
+        // reach an element smaller than list[i]
         while (j >= 0 && list[j] > item) {
+
+            // Shift this item up a position in the list, since it is larger
+            // than the item we are looking at
             list[j + 1] = list[j];
             j--;
         }
+
+        // list[j] is smaller than item and everything larger than item has
+        // been shifted along one position - therefore item should go at index
+        // j+1
         list[j + 1] = item;
     }
 }

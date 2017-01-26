@@ -38,7 +38,6 @@ void generate_data(int *dest, DataGeneratorParams params, int size) {
 
     if (params.ordering == SORTED || params.ordering == REVERSE_SORTED) {
 
-        // If the data is to be (reverse) sorted then use insertion sort
         insertion_sort(dest, size);
 
         if (params.ordering == REVERSE_SORTED) {

@@ -24,6 +24,23 @@ void reverse_array(int *list, int size) {
     }
 }
 
+/*
+ * Comparison function for qsort() to sort integers in ascending order
+ */
+int int_comparison_asc(const void *a_p, const void *b_p) {
+    const int *a_ptr = a_p;
+    const int *b_ptr = b_p;
+    return *a_ptr - *b_ptr;
+}
+
+/*
+ * Comparison function for qsort() to sort integers in descending order
+ */
+int int_comparison_desc(const void *a_p, const void *b_p) {
+    const int *a_ptr = a_p;
+    const int *b_ptr = b_p;
+    return *b_ptr - *a_ptr;
+}
 
 /*
  * Populate the destination array with random numbers according to the
@@ -38,10 +55,18 @@ void generate_data(int *dest, DataGeneratorParams params, int size) {
 
     if (params.ordering == SORTED || params.ordering == REVERSE_SORTED) {
 
-        insertion_sort(dest, size);
+        // Pointer to the comparison function to use
+        int (*comparison_func)(const void *, const void *);
 
-        if (params.ordering == REVERSE_SORTED) {
-            reverse_array(dest, size);
+        if (params.ordering == SORTED) {
+            comparison_func = &int_comparison_asc;
         }
+        else {
+            comparison_func = &int_comparison_desc;
+        }
+
+        // Ironically I do not use insertion/counting sort here since qsort
+        // is much quicker!
+        qsort(dest, size, sizeof(int), comparison_func);
     }
 }

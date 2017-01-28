@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "sorting_test.h"
@@ -24,7 +25,19 @@ void insertion_sort(int *list, int size) {
         // been shifted along one position - therefore item should go at index
         // j+1
         list[j + 1] = item;
+
+        #ifdef DEBUG
+        printf("Insertion step %d: ", i);
+        print_list(list, size);
+        #endif
     }
+
+    #ifdef DEBUG
+    printf("Sorted list is:\n");
+    print_list(list, size);
+
+    printf("--\n");
+    #endif
 }
 
 /*
@@ -43,10 +56,20 @@ void counting_sort(int *list, int *output, int size, int max_value) {
         count_array[list[j]]++;
     }
 
+    #ifdef DEBUG
+    printf("Counting: count array is ");
+    print_list(count_array, max_value + 1);
+    #endif
+
     // Compute the cumulative sum
     for (int i=1; i<=max_value; i++) {
         count_array[i] += count_array[i - 1];
     }
+
+    #ifdef DEBUG
+    printf("Counting: cumulative count is ");
+    print_list(count_array, max_value + 1);
+    #endif
 
     // Put the elements in list into the correct position in output
     for (int j=size - 1; j>=0; j--) {
@@ -58,4 +81,11 @@ void counting_sort(int *list, int *output, int size, int max_value) {
     }
 
     free(count_array);
+
+    #ifdef DEBUG
+    printf("Sorted list is:\n");
+    print_list(output, size);
+
+    printf("--\n");
+    #endif
 }

@@ -8,7 +8,10 @@
 #include "error.h"
 
 // The number of times to sort the data for each array size
-int NO_OF_TESTS = 50;
+#ifndef NO_OF_TESTS
+// This is #define'd so that it may be overriden in debug build
+#define NO_OF_TESTS 50
+#endif
 
 /*
  * An enum to hold the different scenarios for performing the test
@@ -216,13 +219,6 @@ int main(int argc, char **argv) {
             // difference between end and start by CLOCKS_PER_SEC to convert to
             // seconds
             total_time += (double)(end - start) / CLOCKS_PER_SEC;
-
-            #ifdef DEBUG
-            printf("Sorted list is:\n");
-            print_list(list, sizes[i]);
-
-            printf("--\n");
-            #endif
 
             free(list);
         }

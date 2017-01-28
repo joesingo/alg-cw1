@@ -7,8 +7,8 @@
  * Return a random integer in the range [min, max]
  */
 int random_number(int min, int max) {
-    float r = (float) random() / RAND_MAX;  // r will be a rand float in [0, 1]
-    return (int) (min + (max - min) * r);
+    float r = (float) random() / RAND_MAX;  // r will be a rand float in [0, 1)
+    return (int) (min + (max - min + 1) * r);
 }
 
 

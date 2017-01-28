@@ -4,4 +4,4 @@ default: $(files)
 	gcc -o $(exec_name) $(files)
 
 debug: $(files)
-	gcc -o $(exec_name) -D DEBUG $(files)
+	gcc -o $(exec_name) -D DEBUG -D NO_OF_TESTS=1 $(files)

@@ -11,7 +11,6 @@ int random_number(int min, int max) {
     return (int) (min + (max - min + 1) * r);
 }
 
-
 /*
  * Reverse an array of ints in place
  */

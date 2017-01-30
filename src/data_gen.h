@@ -11,7 +11,6 @@ typedef enum {
     RANDOM
 } Ordering;
 
-
 /*
  * A struct to hold parameters to be passed to generate_data()
  */

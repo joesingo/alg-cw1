@@ -7,7 +7,7 @@
 #include "data_gen.h"
 #include "error.h"
 
-// The number of times to sort the data for each array size
+// The number of times to generate and sort data for each array size
 #ifndef NO_OF_TESTS
 // This is #define'd so that it may be overriden in debug build
 #define NO_OF_TESTS 50
@@ -21,7 +21,6 @@ typedef enum {
     WORST_CASE,
     AVERAGE_CASE
 } Scenario;
-
 
 /*
  * Return a pointer to an array of ints of a given size, and show an error

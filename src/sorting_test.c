@@ -121,6 +121,46 @@ void print_list(int *list, int size) {
     printf("\n");
 }
 
+/*
+ * Generate a list according to the parameters provided and sort it using the
+ * specified algorithm. Return the time taken in seconds
+ */
+double perform_test(DataGeneratorParams params, SortingAlgorithm alg, int size) {
+
+    int *list = create_array(size);
+    generate_data(list, params, size);
+
+    #ifdef DEBUG
+    printf("List to sort is:\n");
+    print_list(list, size);
+    #endif
+
+    clock_t start;
+    clock_t end;
+
+    if (alg == INSERTION_SORT) {
+        start = clock();
+        insertion_sort(list, size);
+        end = clock();
+    }
+    else if (alg == COUNTING_SORT) {
+        int *output = create_array(size);
+
+        start = clock();
+        counting_sort(list, output, size, params.max);
+        end = clock();
+
+        free(output);
+    }
+
+    free(list);
+
+    // clock() returns the processor time used so far, so divide the
+    // difference between end and start by CLOCKS_PER_SEC to convert to
+    // seconds
+    return (double)(end - start) / CLOCKS_PER_SEC;
+}
+
 int main(int argc, char **argv) {
     srandom(time(NULL));
 
@@ -156,15 +196,10 @@ int main(int argc, char **argv) {
             break;
     }
 
-    // Caclulate the array sizes to use based on the values defined above
-    int sizes[num_sizes];
-    for (int i=0; i<num_sizes; i++) {
-        sizes[i] = start_size + i * step_size;
-    }
-
     // Perform the actual test
     for (int i=0; i<num_sizes; i++) {
 
+        int size = start_size + i * step_size;
         double total_time = 0;
 
         // For each array size perform the test NO_OF_TESTS times, then
@@ -177,54 +212,23 @@ int main(int argc, char **argv) {
 
                 if (scenario == BEST_CASE) {
                     // Good performance when k = n
-                    params.max = sizes[i];
+                    params.max = size;
                 }
 
                 else if (scenario == WORST_CASE) {
                     // Bad performance is when k is significantly larger than n,
                     // e.g. n^2. Note that we could also choose n^3, 2^n, n!
                     // etc to get even worse performance
-                    params.max = sizes[i] * sizes[i];
+                    params.max = size * size;
                 }
             }
 
-            int *list = create_array(sizes[i]);
-            generate_data(list, params, sizes[i]);
-
-            #ifdef DEBUG
-            printf("List to sort is:\n");
-            print_list(list, sizes[i]);
-            #endif
-
-            clock_t start;
-            clock_t end;
-
-            if (alg == INSERTION_SORT) {
-                start = clock();
-                insertion_sort(list, sizes[i]);
-                end = clock();
-            }
-            else if (alg == COUNTING_SORT) {
-                int *output = create_array(sizes[i]);
-
-                start = clock();
-                counting_sort(list, output, sizes[i], params.max);
-                end = clock();
-
-                free(output);
-            }
-
-            // clock() returns the processor time used so far, so divide the
-            // difference between end and start by CLOCKS_PER_SEC to convert to
-            // seconds
-            total_time += (double)(end - start) / CLOCKS_PER_SEC;
-
-            free(list);
+            total_time += perform_test(params, alg, size);
         }
 
         // Print out the array size and average time taken in CSV format
         double time_taken = total_time / NO_OF_TESTS;
-        printf("%d,%f\n", sizes[i], time_taken);
+        printf("%d,%f\n", size, time_taken);
     }
 
     return 0;

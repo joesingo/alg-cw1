@@ -7,7 +7,16 @@ const static char *PROGRAM_NAME = "sorting_test";
  */
 void print_usage() {
     printf("Usage: %s (insertion | counting) (best | worst | average) " \
-           "<start size> <step> <no. of data points>\n", PROGRAM_NAME);
+           "<min size> <max size> <no. of data points> [-q]\n", PROGRAM_NAME);
+}
+
+void print_help() {
+    print_usage();
+    printf("\nOptions:\n");
+    printf("  -h    Show this help\n");
+    printf("  -q    Arrange data points so that their squares are equally\n" \
+           "        spaced apart. By default the data points themselves are\n" \
+           "        spaced apart equally\n");
 }
 
 /*

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <math.h>
 
 #include "sorting.h"
 #include "data_gen.h"
@@ -10,7 +11,7 @@
 // The number of times to generate and sort data for each array size
 #ifndef NO_OF_TESTS
 // This is #define'd so that it may be overriden in debug build
-#define NO_OF_TESTS 50
+#define NO_OF_TESTS 100
 #endif
 
 /*
@@ -61,17 +62,26 @@ int read_pos_integer(char *str, char *e_message) {
 
 /*
  * Validate the provided command line arguments and set the scenario, algorithm,
- * start size, step size, and no. of data points
+ * minimum size, maximum size, and no. of data points
  */
 void get_args(int argc, char **argv, Scenario *scenario, SortingAlgorithm *alg,
-              int *start_size, int *step_size, int *num_sizes) {
+              int *min_size, int *max_size, int *num_sizes, int *quad_scaling) {
+
+
+    // See is -h or --help was specified
+    if (argc > 0 && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)) {
+        print_help();
+        exit(0);
+    }
 
     // Check the correct number of arguments have been provided
     if (argc < 6) {
+
         print_error("Invalid arguments");
         print_usage();
         exit(1);
     }
+
 
     // Check the scenario (best/worst/average) is valid
     if (strcmp(argv[2], "best") == 0) {
@@ -102,9 +112,22 @@ void get_args(int argc, char **argv, Scenario *scenario, SortingAlgorithm *alg,
         exit(1);
     }
 
-    *start_size = read_pos_integer(argv[3], "Invalid start size");
-    *step_size = read_pos_integer(argv[4], "Invalid step size");
+    *min_size = read_pos_integer(argv[3], "Invalid minimum size");
+    *max_size = read_pos_integer(argv[4], "Invalid maximum size");
     *num_sizes = read_pos_integer(argv[5], "Invalid number of sizes");
+
+    if (*max_size <= *min_size) {
+        print_error("Maximum size must be greater than minimum size");
+        exit(1);
+    }
+
+    // Check if -q option has been provided
+    if (argc >= 7 && strcmp(argv[6], "-q") == 0) {
+        *quad_scaling = 1;
+    }
+    else {
+        *quad_scaling = 0;
+    }
 }
 
 /*
@@ -166,8 +189,9 @@ int main(int argc, char **argv) {
 
     Scenario scenario;
     SortingAlgorithm alg;
-    int start_size, step_size, num_sizes;
-    get_args(argc, argv, &scenario, &alg, &start_size, &step_size, &num_sizes);
+    int min_size, max_size, num_sizes, quad_scaling;
+    get_args(argc, argv, &scenario, &alg, &min_size, &max_size, &num_sizes,
+             &quad_scaling);
 
     // Set data gen parameters to default values
     DataGeneratorParams params;
@@ -196,10 +220,27 @@ int main(int argc, char **argv) {
             break;
     }
 
+    int sizes[num_sizes];
+
+    // If the -q option was specified then we should choose the array sizes so
+    // that their squares are evenly spaced out (e.g. to plot n^2 on horizontal
+    // axis). Hence we generate evenly spaced points between min^2 and max^2 and
+    // take the square root
+    int start = (quad_scaling ? min_size * min_size : min_size);
+    int end = (quad_scaling ? max_size * max_size : max_size);
+    int step = (end - start) / (num_sizes - 1);
+
+    for (int i=0; i<num_sizes; i++) {
+        sizes[i] = start + i * step;
+
+        if (quad_scaling) {
+            sizes[i] = sqrt(sizes[i]);
+        }
+    }
+
     // Perform the actual test
     for (int i=0; i<num_sizes; i++) {
 
-        int size = start_size + i * step_size;
         double total_time = 0;
 
         // For each array size perform the test NO_OF_TESTS times, then
@@ -212,23 +253,23 @@ int main(int argc, char **argv) {
 
                 if (scenario == BEST_CASE) {
                     // Good performance when k = n
-                    params.max = size;
+                    params.max = sizes[i];
                 }
 
                 else if (scenario == WORST_CASE) {
                     // Bad performance is when k is significantly larger than n,
                     // e.g. n^2. Note that we could also choose n^3, 2^n, n!
                     // etc to get even worse performance
-                    params.max = size * size;
+                    params.max = sizes[i] * sizes[i];
                 }
             }
 
-            total_time += perform_test(params, alg, size);
+            total_time += perform_test(params, alg, sizes[i]);
         }
 
         // Print out the array size and average time taken in CSV format
         double time_taken = total_time / NO_OF_TESTS;
-        printf("%d,%f\n", size, time_taken);
+        printf("%d,%f\n", sizes[i], time_taken);
     }
 
     return 0;

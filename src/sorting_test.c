@@ -230,7 +230,7 @@ int main(int argc, char **argv) {
     int end = (quad_scaling ? max_size * max_size : max_size);
 
     float step;
-    if (step > 1) {
+    if (num_sizes > 1) {
         step = (float) (end - start) / (num_sizes - 1);
     }
     else {

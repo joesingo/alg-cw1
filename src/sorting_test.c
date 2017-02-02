@@ -260,14 +260,14 @@ int main(int argc, char **argv) {
 
                 if (scenario == BEST_CASE) {
                     // Good performance when k = n
-                    params.max = sizes[i];
+                    params.max = sizes[i] - 1;  // -1 since min is 0, not 1
                 }
 
                 else if (scenario == WORST_CASE) {
                     // Bad performance is when k is significantly larger than n,
                     // e.g. n^2. Note that we could also choose n^3, 2^n, n!
                     // etc to get even worse performance
-                    params.max = sizes[i] * sizes[i];
+                    params.max = sizes[i] * sizes[i] - 1;
                 }
             }
 

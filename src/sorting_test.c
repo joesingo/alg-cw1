@@ -68,7 +68,7 @@ void get_args(int argc, char **argv, Scenario *scenario, SortingAlgorithm *alg,
               int *min_size, int *max_size, int *num_sizes, int *quad_scaling) {
 
 
-    // See is -h or --help was specified
+    // See if -h or --help was specified
     if (argc > 0 && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)) {
         print_help();
         exit(0);
@@ -228,7 +228,14 @@ int main(int argc, char **argv) {
     // take the square root
     int start = (quad_scaling ? min_size * min_size : min_size);
     int end = (quad_scaling ? max_size * max_size : max_size);
-    float step = (float) (end - start) / (num_sizes - 1);
+
+    float step;
+    if (step > 1) {
+        step = (float) (end - start) / (num_sizes - 1);
+    }
+    else {
+        step = 0;
+    }
 
     for (int i=0; i<num_sizes; i++) {
         sizes[i] = start + i * step;

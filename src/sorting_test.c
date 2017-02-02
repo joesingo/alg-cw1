@@ -228,7 +228,7 @@ int main(int argc, char **argv) {
     // take the square root
     int start = (quad_scaling ? min_size * min_size : min_size);
     int end = (quad_scaling ? max_size * max_size : max_size);
-    int step = (end - start) / (num_sizes - 1);
+    float step = (float) (end - start) / (num_sizes - 1);
 
     for (int i=0; i<num_sizes; i++) {
         sizes[i] = start + i * step;

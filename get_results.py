@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 
 PROG_PATH = "./sorting_test"
 
+# Change this to whatever you want!
 RESULTS_PATH = "/home/joe/uni/comp/Algorithms and Data structures/cw1/results/"
 
 # The min array size, max array size, and number of data points
@@ -58,24 +59,33 @@ def collect_data(filename):
             subprocess.call(args, stdout=f)
 
 """
-Write the results in timings in table markup for LaTeX in the file specified
+Write the timing results in table markup for LaTeX to files
 """
-def to_latex_table(timings, filename):
-    print("Writing tables to {}".format(filename))
+def to_latex_table(timings):
 
-    with open(filename, "w") as f:
-        for (alg, case), data in timings.items():
+    for (alg, case), data in timings.items():
+        filename = os.path.join(RESULTS_PATH, "{}-{}.tex".format(alg, case))
 
-            f.write("% {} sort - {} case\n".format(alg, case))
+        with open(filename, "w") as f:
+            print("Writing table to {}".format(filename))
+
+            f.write("\\begin{table}[H]\n")
+            f.write("\\footnotesize\n")
+            f.write("\\centering\n")
             f.write("\\begin{tabular}{c | c}\n")
-
             f.write("\\textbf{Array size} & \\textbf{Average run-time (seconds)} "
                     "\\\ \\hline\n")
 
             for n in data:
                 f.write("{} & {} \\\ \n".format(n, data[n]))
 
+            caption = "{} sort {} case results".format(alg.title(), case)
+            label = "tab:{}-{}-results".format(alg.lower(), case.lower())
+
             f.write("\\end{tabular}\n\n")
+            f.write("\\caption{" + caption + "}\n")
+            f.write("\\label{" + label + "}\n")
+            f.write("\\end{table}")
 
 """
 Parse a CSV file and return timing data in a dictionary. The keys are tuples of
@@ -145,7 +155,7 @@ else:
 
 timings = parse_csv(filename)
 
-to_latex_table(timings, os.path.join(RESULTS_PATH, "tables.tex"))
+to_latex_table(timings)
 
 # Plot and save graphs
 for (alg, case), data in timings.items():

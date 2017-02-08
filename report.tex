@@ -1,1 +1,428 @@
-../report.tex
+\documentclass{article}
+
+\usepackage{mfirstuc}  % To make captions capitalised in \results macro
+\usepackage{tgbonum}  % For cool font
+\usepackage{fancyvrb} % For boxes for test code printouts
+\usepackage[title]{appendix}  % For appendicies
+\usepackage{minted}  % For source code with syntax highlighting
+\usepackage{algorithmic}  % For psuedocode
+\usepackage[top=2cm, bottom=2cm, left=3.5cm, right=3.5cm]{geometry}
+\usepackage{graphicx}  % For graphs
+\usepackage{csquotes}  % To include quote from man 3 clock
+\usepackage{subfig}  % To adjust padding between figure captions and figure
+
+\captionsetup{aboveskip=12pt}
+
+\interfootnotelinepenalty=10000  % This prevents footnote being split across 2 pages
+
+\renewcommand{\listingscaption}{Figure}
+\usemintedstyle{friendly}
+\setminted{
+	fontsize=\small
+}
+
+\setlength{\parskip}{0.5em}
+
+\title{A Run-Time Analysis of Insertion Sort and Counting Sort}
+\author{Joe Singleton}
+\date{}
+
+\newcommand{\results}[2] {
+	% #1: algorithm
+	% #2: case
+
+	\begin{table}[H]
+		\centering
+		\caption{\makefirstuc{#1} sort {#2} performance}
+		\label{tab:#1-#2}
+
+		\input{results/#1-#2.tex}
+	\end{table}
+
+	\begin{figure}[H]
+		\centerline{
+			\includegraphics[width=\paperwidth]{results/#1-#2}
+		}
+		\caption{\makefirstuc{#1} sort {#2} performance}
+		\label{#1-#2-graph}
+	\end{figure}
+}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+
+In this report the run-time performance of insertion sort and counting sort is measured and compared to the theoretical run-time.
+
+The theoretical run-time complexity of insertion sort is $O(n)$ in best case (when the list is already sorted), $O(n^2)$ in the worst case (when the list is reverse-sorted) and $O(n^2)$ in the average case, where $n$ is the number of items to be sorted.
+
+The theoretical complexity of counting sort is $O(k+n)$, where $n$ is the number of items to be sorted and $k$ is the number of possible values in the list.
+
+If $k$ is not significantly larger than $n$ (e.g. $k$ is a constant multiple of $n$) then the complexity becomes $O(n)$.
+
+In a situation where $k$ depends on $n$ we can consider $k$ as a \textit{function} of $n$; in this case the complexity is the `larger' big-O class of $O(k)$ and $O(n)$.
+
+For example, if $k=n^2$ then the complexity is $O(n^2)$, and if $k=2^n$ then $O(2^n)$.
+
+For the purposes of this report, good performance is achieved when $k=n$ (i.e. $O(n)$) and bad performance when $k=n^2$ (i.e. $O(n^2)$). However note that even worse performance can be achieved by taking $k=n^3$, $k=2^n$, $k=n!$ etc\ldots
+
+\section{Pseudocode and Implementation}
+
+\subsection{Psuedocode}
+Psuedocode for insertion and counting sort is presented below.
+
+\begin{figure}[H]
+\begin{algorithmic}
+\STATE {\bf Algorithm} insertionSort($A$, $n$)
+\STATE {\itshape Input}: an array $A$ storing $n$ integers
+\STATE {\itshape Output}: array $A$ sorted in non--descending order
+\FOR {$i \leftarrow 1$ {\bf to} $(n-1)$}
+  \STATE $item \leftarrow A[i]$
+  \STATE $j \leftarrow i-1$
+  \WHILE {$j \ge 0$ {\bf and} $A[j]>item$}
+    \STATE $A[j+1] \leftarrow A[j]$
+    \STATE $j \leftarrow j-1$
+  \ENDWHILE
+  \STATE $A[j+1] \leftarrow item$
+\ENDFOR
+\end{algorithmic}
+\caption{Insertion sort pseudocode}
+\end{figure}
+
+\begin{figure}[H]
+\begin{algorithmic}
+\STATE {\bf Algorithm} countingSort($A$, $B$, $n$, $k$)
+\STATE {\itshape Input}: array $A$, with $n$ elements,
+	each with value from $0$ to $k-1$
+\STATE \emph{Output}: sorted array $B$
+\FOR {$i \leftarrow 0$ {\bf to} $k-1$}
+   \STATE $C[i] \leftarrow 0$
+\ENDFOR
+\FOR {$j \leftarrow 0$ {\bf to} $n-1$}
+   \STATE $C[A[j]] \leftarrow C[A[j]] + 1$
+ \ENDFOR
+ % // C [i] now contains the number of elements with value i
+\FOR {$i \leftarrow 1$ {\bf to} $k-1$}
+   \STATE $C[i] \leftarrow C[i] + C[i-1]$
+\ENDFOR
+%  // C [i] now contains the number of elements with value ≤ i
+\FOR {$j \leftarrow n-1$ {\bf downto} $0$}
+   \STATE $B[C[A[j]]-1] \leftarrow A[j]$
+   \STATE $C[A[j]] \leftarrow C [A[j]] - 1$
+\ENDFOR
+\end{algorithmic}
+\caption{Counting sort pseudocode}
+\end{figure}
+
+The algorithm used to generate arrays of random integers takes a size, maximum/minimum value and `ordering' (i.e. sorted, reverse-sorted or random) as parameters. Pseudocode is outlined in Fig. \ref{data-gen-alg}.
+
+\begin{figure}[H]
+\begin{algorithmic}
+\STATE {\bf Algorithm} generateArray($A$, $n$, $min$, $max$, $ordering$)
+\STATE {\itshape Input}: Size $n$, maximum and minimum values $min$ and $max$, and ordering type $ordering$
+\STATE {\itshape Output}: Array $A$ containging $n$ integers
+
+\FOR {$i \leftarrow 0$ {\bf to} $n-1$}
+	\STATE Generate random integer $r$ in range $[min, max]$
+	\STATE $A[i] \leftarrow r$
+\ENDFOR
+
+\IF {$ordering$ is `sorted'}
+	\STATE Sort array $A$ in ascending order
+\ELSIF {$ordering$ is `reverse-sorted`}
+	\STATE Sort array $A$ is descending order
+\ENDIF
+
+\end{algorithmic}
+\caption{Input data generation psuedocode}
+\label{data-gen-alg}
+\end{figure}
+
+\subsection{Implementation}
+To obtain run-time measurements I wrote a program in C. An overview of each source file and its purpose presented below.
+
+\begin{itemize}
+\item \textbf{error.c, error.h}: Provides functions to report errors and display program usage
+
+\item \textbf{data\_gen.c, data\_gen.h}: Provides functions to generate arrays of random integers according to some specified parameters. This is used to generate the data to perform the sorting on.
+
+\item \textbf{sorting.c, sorting.h}: Contains the actual implementation of insertion and counting sort.
+
+\item \textbf{sorting\_test.c, sorting\_test.h}: The entry-point for the program. Arguments are read from command-line arguments and the results are printed to \texttt{stdout} in CSV format.
+
+\end{itemize}
+
+The code was developed and tested on Ubuntu 16.04.1 and compiled with \texttt{gcc}.
+
+\subsubsection{Usage}
+
+The program can be run as follows:
+
+\small\texttt{sorting\_test (insertion | counting) (best | worst | average) <min size> <max size> <no. of data points> [-q]}
+
+For example,
+
+\begin{figure}[H]
+	\centering
+	\begin{BVerbatim}
+$ ./sorting_test insertion average 100 200 5
+100,0.000036
+125,0.000054
+150,0.000072
+175,0.000086
+200,0.000104
+	\end{BVerbatim}
+	\caption{Example output}
+	\label{ex-output}
+\end{figure}
+
+Each line in the output shows the array size and the average time in seconds taken to sort an array of that size over 100 repetitions (with a different list generated for each repetition).
+
+By default the array sizes used are spaced uniformly between \texttt{min size} and \texttt{max size} (rounded to the nearest integer). If the \texttt{-q} option is specified then the array sizes are chosen such that their \textit{squares} are uniformly spaced - this is useful to avoid clustering when plotting graphs with $n^2$ along the horizontal axis rather than $n$.
+
+\subsubsection{Run-time Measurements}
+
+To measure run-time the \texttt{clock()} function is used. To quote the \texttt{man} page for \texttt{clock()}:
+
+\begin{displayquote}
+The \texttt{clock()} function returns an approximation of processor time used by the program.
+\end{displayquote}
+
+This has the advantage that it measures CPU time rather than `wall-clock time', which would include time spent on other process running simultaneously.
+
+In the \texttt{perform\_test()} function in \texttt{sorting\_test.c} the calls to \texttt{clock()} are made immediately before and after the calls to the sorting algorithm - this ensures that the measurements do not include time spent on other code such as I/O or memory management.
+
+\subsection{Source Code}
+
+The full source code is included below. Other code used in the making of this report includes a makefile and Python script to create graphs and tables (see appendices A and B).
+
+\subsubsection{error.c}
+\inputminted{c}{alg-cw1/src/error.c}
+
+\subsubsection{error.h}
+\inputminted{c}{alg-cw1/src/error.h}
+
+\subsubsection{data\_gen.c}
+\inputminted{c}{alg-cw1/src/data_gen.c}
+
+\subsubsection{data\_gen.h}
+\inputminted{c}{alg-cw1/src/data_gen.h}
+
+\subsubsection{sorting.c}
+\inputminted{c}{alg-cw1/src/sorting.c}
+
+\subsubsection{sorting.h}
+\inputminted{c}{alg-cw1/src/sorting.h}
+
+\subsubsection{sorting\_test.c}
+\inputminted{c}{alg-cw1/src/sorting_test.c}
+
+\subsubsection{sorting\_test.h}
+\inputminted{c}{alg-cw1/src/sorting_test.h}
+
+\section{Testing}
+
+A debug version of the program can be compiled by defining \texttt{DEBUG} during compilation (alternatively, by running \texttt{make debug} if using the makefile in appendix A). In the debug version each array size is tested only once and some intermediate results are printed out.
+
+Some example printouts are included below.
+
+\subsection{Insertion Sort}
+
+Fig. \ref{ins-best-test} shows the progress of insertion sort in the best case, i.e. when the list to sort is already in the correct order. In this case the list is never changed, since the inner loop in the algorithm is never executed.
+
+Fig. \ref{ins-avg-test} shows insertion sort in the average case, which is when the elements of the list are in a random order. It can be seen that at stage $i$ the element at index $i$ in the original list (with indexing starting at 0) is shifted leftwards so that it is `inserted' into the correct position in the left portion of the list. This verifies that the implementation of the algorithm is working correctly.
+
+Insertion sort in the worst case, which occurs when the list is reverse-sorted, is shown in Fig. \ref{ins-worst-test}. In this case the inner loop in the algorithm should be executed fully, i.e. until $j < 0$. Looking at the output it can be seen that this indeed the case, since at stage $i$ the element at index $i$ of the original list has been moved all the way down to index 0.
+
+\begin{figure}[H]
+	\centering
+	\begin{BVerbatim}
+$ ./sorting_test insertion best 10 15 1
+List to sort is:
+10, 14, 32, 44, 46, 46, 62, 63, 78, 79
+Insertion step 1: 10, 14, 32, 44, 46, 46, 62, 63, 78, 79
+Insertion step 2: 10, 14, 32, 44, 46, 46, 62, 63, 78, 79
+Insertion step 3: 10, 14, 32, 44, 46, 46, 62, 63, 78, 79
+Insertion step 4: 10, 14, 32, 44, 46, 46, 62, 63, 78, 79
+Insertion step 5: 10, 14, 32, 44, 46, 46, 62, 63, 78, 79
+Insertion step 6: 10, 14, 32, 44, 46, 46, 62, 63, 78, 79
+Insertion step 7: 10, 14, 32, 44, 46, 46, 62, 63, 78, 79
+Insertion step 8: 10, 14, 32, 44, 46, 46, 62, 63, 78, 79
+Insertion step 9: 10, 14, 32, 44, 46, 46, 62, 63, 78, 79
+Sorted list is:
+10, 14, 32, 44, 46, 46, 62, 63, 78, 79
+--
+10,0.000201
+	\end{BVerbatim}
+	\caption{Insertion sort best case}
+	\label{ins-best-test}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{BVerbatim}
+$ ./sorting_test insertion average 10 15 1
+List to sort is:
+100, 59, 76, 76, 87, 58, 9, 65, 39, 65
+Insertion step 1: 59, 100, 76, 76, 87, 58, 9, 65, 39, 65
+Insertion step 2: 59, 76, 100, 76, 87, 58, 9, 65, 39, 65
+Insertion step 3: 59, 76, 76, 100, 87, 58, 9, 65, 39, 65
+Insertion step 4: 59, 76, 76, 87, 100, 58, 9, 65, 39, 65
+Insertion step 5: 58, 59, 76, 76, 87, 100, 9, 65, 39, 65
+Insertion step 6: 9, 58, 59, 76, 76, 87, 100, 65, 39, 65
+Insertion step 7: 9, 58, 59, 65, 76, 76, 87, 100, 39, 65
+Insertion step 8: 9, 39, 58, 59, 65, 76, 76, 87, 100, 65
+Insertion step 9: 9, 39, 58, 59, 65, 65, 76, 76, 87, 100
+Sorted list is:
+9, 39, 58, 59, 65, 65, 76, 76, 87, 100
+--
+10,0.000069
+	\end{BVerbatim}
+	\caption{Insertion sort average case}
+	\label{ins-avg-test}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{BVerbatim}
+$ ./sorting_test insertion worst 10 15 1
+List to sort is:
+88, 86, 60, 54, 53, 43, 31, 16, 15, 3
+Insertion step 1: 86, 88, 60, 54, 53, 43, 31, 16, 15, 3
+Insertion step 2: 60, 86, 88, 54, 53, 43, 31, 16, 15, 3
+Insertion step 3: 54, 60, 86, 88, 53, 43, 31, 16, 15, 3
+Insertion step 4: 53, 54, 60, 86, 88, 43, 31, 16, 15, 3
+Insertion step 5: 43, 53, 54, 60, 86, 88, 31, 16, 15, 3
+Insertion step 6: 31, 43, 53, 54, 60, 86, 88, 16, 15, 3
+Insertion step 7: 16, 31, 43, 53, 54, 60, 86, 88, 15, 3
+Insertion step 8: 15, 16, 31, 43, 53, 54, 60, 86, 88, 3
+Insertion step 9: 3, 15, 16, 31, 43, 53, 54, 60, 86, 88
+Sorted list is:
+3, 15, 16, 31, 43, 53, 54, 60, 86, 88
+--
+10,0.000099
+	\end{BVerbatim}
+	\caption{Insertion sort worst case}
+	\label{ins-worst-test}
+\end{figure}
+
+\subsection{Counting Sort}
+
+An example of good performance with counting sort is shown in Fig. \ref{counting-good-test}. In this case we have $k=n$, i.e. the number of possible values is equal to the number of elements in the list (so the numbers are in the range 0 to 9 for a 10-element list).
+
+Fig. \ref{counting-bad-test} shows an example of bad performance for counting sort. In this case $k=n^2$, so for a 4-element list there at 16 possible values, i.e. numbers are in the range 0 to 15.
+
+It is easily verified by looking at the original list in Fig. \ref{counting-good-test}, \ref{counting-bad-test} that the count and cumulative count arrays shows are correct.
+
+\begin{figure}[H]
+	\centering
+	\begin{BVerbatim}
+$ ./sorting_test counting best 10 15 1
+List to sort is:
+0, 0, 3, 6, 1, 6, 7, 4, 0, 7
+Counting: count array is 3, 1, 0, 1, 1, 0, 2, 2, 0, 0
+Counting: cumulative count is 3, 4, 4, 5, 6, 6, 8, 10, 10, 10
+Sorted list is:
+0, 0, 0, 1, 3, 4, 6, 6, 7, 7
+--
+10,0.000042
+	\end{BVerbatim}
+	\caption{Counting sort good performance}
+	\label{counting-good-test}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{BVerbatim}
+$ ./sorting_test counting worst 4 5 1
+List to sort is:
+14, 15, 3, 4
+Counting: count array is 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+Counting: cumulative count is 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 4
+Sorted list is:
+3, 4, 14, 15
+--
+4,0.000025
+	\end{BVerbatim}
+	\caption{Counting sort bad performance}
+	\label{counting-bad-test}
+\end{figure}
+
+\section{Experimental Setup and Results}
+
+To obtain run-time measurements for each algorithm/case combination the program was run{\footnotemark} with parameters \texttt{1000 10000 50}, i.e. 50 array sizes from 1,000 to 10,000 were tested. These numbers were chosen large enough that the results are meaningful, and small enough that the experiment completes in a reasonable amount of time.
+
+\footnotetext{The machine used was a Lenovo Yoga laptop, with 8GB memory and an Intel i3-4030U 1.90GHz processor.
+}
+
+To analyse the results a graph was plotted for each test. It is straightforward to verify that the run-time is linear by plotting $n$ against run-time and applying linear regression techniques to produce a line of best fit. It can then be visually verifed that the data points are approximately on this line.
+
+However if the run-time is not linear, say $O(n^2)$, simply plotting $n$ against run-time does not provide much insight. In this case one could not be certain that the resulting curve is not actually cubic, quartic  or even exponential, since the graphs of these types of functions look similar.
+
+Instead, $n^2$ can be plotted against run-time. If the resulting data points lie approximately on a straight line there are constants $a$ (slope of the line), and $b$ (intercept with the vertical axis) such that the run-time approximately fits the curve $an^2 + b$, which means that the run time is $O(n^2)$ \footnotemark.
+
+\footnotetext{
+More precisely, we need all the data points to lie \textit{between} two straight lines when $n^2$ is plotted against run-time, and for the array sizes used to be large enough that we can be sure this behaviour would continue as $n \rightarrow \infty$. This shows the run-time is $O(n^2)$ (since big-O is an \textit{upper bound}) and $\Omega(n^2)$ (since big-Omega is a \textit{lower bound}) and therefore $O(n^2)$ is indeed the smallest big-O class.
+}
+
+With this in mind, the situations where the theoretical run-time is $O(n^2)$ are run with the \texttt{-q} option. This ensures that the points plotted in the graphs below are evenly spaced horizontally (otherwise squaring $n$ would result in clustering for small $n$).
+
+In Fig. \ref{insertion-best-graph}-\ref{counting-bad-graph} the red dots represent data points, and the blue lines show the linear least-squares regression of these points.
+
+\subsection{Insertion Sort}
+\results{insertion}{best}
+\results{insertion}{average}
+\results{insertion}{worst}
+
+\subsection{Counting Sort}
+\results{counting}{good}
+\results{counting}{bad}
+
+\section{Conclusions}
+The theoretical run-time performance of insertion sort is $O(n)$ in the best case and $O(n^2)$ in the average and worst cases. For counting sort $O(n)$ is considered to be an example of good performance and $O(n^2)$ to be an example of bad performance.
+
+With this in mind, $n$ is plotted on the horizontal axis in Fig. \ref{insertion-best-graph} and \ref{counting-good-graph}, and $n^2$ on the horizontal in Fig. \ref{insertion-average-graph}, \ref{insertion-worst-graph} and \ref{counting-bad-graph}.
+
+If the experimental results coincide with the theoretical predictions then it should be expected that the data points lie approximately on a \textit{straight line} in each graph. Looking at Fig. \ref{insertion-best-graph}-\ref{counting-bad-graph} this does indeed seem to be the case.
+
+In Fig. \ref{insertion-best-graph} there is an outlier at $n=3204$ - this was most likely caused by a background process starting at an unfortunate time when the experiment was being run.
+
+There are some small deviations from the line in Fig. \ref{counting-good-graph}, namely at $n=4122, 7244, 8897$; however the overall trend is certainly linear.
+
+In Fig. \ref{insertion-average-graph}, \ref{insertion-worst-graph} and \ref{counting-bad-graph} there are no notable outliers, and the data points appear to fit the line of best fit almost exactly.
+
+From these results some advice can be given regarding when to use insertion sort and when to use counting sort:
+
+\begin{itemize}
+
+\item{
+If the data to be sorted is roughly already in the correct order, insertion sort is a good choice. As seen in table \ref{tab:insertion-best}, it took on average only 0.000071 seconds to sort 10,000 elements already in the correct order. If the elements are \textit{roughly} in the correct order we can expect the run-time to be similar.
+}
+
+\item{
+If the elements in the list to be sorted are integers (or can be efficiently mapped to integer keys), and the maximum value is not significantly more than the array size, counting sort will work well. In table \ref{tab:counting-good} the average time to sort 10,000 elements was 0.000241 seconds in the good performance scenario for counting sort. This is in contrast to the average case insertion sort time of 0.13137 seconds (table \ref{tab:insertion-average}).
+}
+
+\end{itemize}
+
+\begin{appendices}
+
+\section{}
+The makefile used to compile the C program is as follows.
+
+\inputminted{make}{alg-cw1/Makefile}
+
+\section{}
+To gather the results used in this report I wrote the following Python script. The script reads data from a CSV file specified as a command line argument, or generates the data if no filename is provided.
+
+It then creates graphs using \texttt{Matplotlib}, and generates \LaTeX markup for the tables presented in section 4.
+
+\inputminted{python}{alg-cw1/get_results.py}
+
+\end{appendices}
+
+\end{document}

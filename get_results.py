@@ -59,35 +59,6 @@ def collect_data(filename):
             subprocess.call(args, stdout=f)
 
 """
-Write the timing results in table markup for LaTeX to files
-"""
-def to_latex_table(timings):
-
-    for (alg, case), data in timings.items():
-        filename = os.path.join(RESULTS_PATH, "{}-{}.tex".format(alg, case))
-
-        with open(filename, "w") as f:
-            print("Writing table to {}".format(filename))
-
-            f.write("\\begin{table}[H]\n")
-            f.write("\\footnotesize\n")
-            f.write("\\centering\n")
-            f.write("\\begin{tabular}{c | c}\n")
-            f.write("\\textbf{Array size} & \\textbf{Average run-time (seconds)} "
-                    "\\\ \\hline\n")
-
-            for n in data:
-                f.write("{} & {} \\\ \n".format(n, data[n]))
-
-            caption = "{} sort {} case results".format(alg.title(), case)
-            label = "tab:{}-{}-results".format(alg.lower(), case.lower())
-
-            f.write("\\end{tabular}\n\n")
-            f.write("\\caption{" + caption + "}\n")
-            f.write("\\label{" + label + "}\n")
-            f.write("\\end{table}")
-
-"""
 Parse a CSV file and return timing data in a dictionary. The keys are tuples of
 the form (alg, case). The values are OrderedDicts where the keys are the array
 sizes and values are average time taken in seconds
@@ -155,10 +126,31 @@ else:
 
 timings = parse_csv(filename)
 
-to_latex_table(timings)
-
-# Plot and save graphs
+# Create LaTeX tables and graphs
 for (alg, case), data in timings.items():
+
+    case_display_name = case
+    desc = "case" if alg == INSERTION else "performance"
+
+    if alg == COUNTING:
+        case_display_name = ("good" if case == BEST_CASE else "bad")
+
+    base_filename = os.path.join(RESULTS_PATH, "{}-{}".format(alg, case_display_name))
+
+    # Write table to .tex file
+    table_filename = base_filename + ".tex"
+
+    with open(table_filename, "w") as f:
+        print("Writing table to {}".format(table_filename))
+
+        f.write("\\begin{tabular}{c | c}\n")
+        f.write("\\textbf{Array size} & \\textbf{Average run-time (seconds)} "
+                "\\\ \\hline\n")
+
+        for n in data:
+            f.write("{} & {} \\\ \n".format(n, data[n]))
+
+        f.write("\\end{tabular}\n\n")
 
     ns = np.array(data.keys())
     ys = np.array(data.values())
@@ -174,7 +166,10 @@ for (alg, case), data in timings.items():
     fig, ax = plt.subplots(figsize=(16, 9))
 
     ax.grid(True)
-    plt.title("{} sort - {} case".format(alg.title(), case.title()), fontsize=20, y=1.04)
+    plt.title("{} sort - {} {}".format(alg.title(), case_display_name.title(),
+                                       desc),
+              fontsize=20, y=1.04)
+
     plt.xlabel(label, fontsize=24)
     plt.ylabel("Average time (seconds)", fontsize=15)
     ax.grid(True)
@@ -184,6 +179,6 @@ for (alg, case), data in timings.items():
     scatter = plt.plot(ns, ys, "or", markersize=8)
     plt.plot(ns, slope * ns + intercept)
 
-    plot_filename = os.path.join(RESULTS_PATH, "{}-{}.png".format(alg, case))
+    plot_filename = base_filename + ".png"
     print("Saving plot to {}".format(plot_filename))
     plt.savefig(plot_filename)

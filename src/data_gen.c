@@ -12,18 +12,6 @@ int random_number(int min, int max) {
 }
 
 /*
- * Reverse an array of ints in place
- */
-void reverse_array(int *list, int size) {
-    for (int i=0; i<size / 2; i++) {
-        int j = size - 1 - i;
-        int temp = list[i];
-        list[i] = list[j];
-        list[j] = temp;
-    }
-}
-
-/*
  * Comparison function for qsort() to sort integers in ascending order
  */
 int int_comparison_asc(const void *a_p, const void *b_p) {

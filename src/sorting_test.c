@@ -76,12 +76,10 @@ void get_args(int argc, char **argv, Scenario *scenario, SortingAlgorithm *alg,
 
     // Check the correct number of arguments have been provided
     if (argc < 6) {
-
         print_error("Invalid arguments");
         print_usage();
         exit(1);
     }
-
 
     // Check the scenario (best/worst/average) is valid
     if (strcmp(argv[2], "best") == 0) {

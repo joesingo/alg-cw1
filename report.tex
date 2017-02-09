@@ -73,7 +73,7 @@ For the purposes of this report, good performance is achieved when $k=n$ (i.e. $
 \section{Pseudocode and Implementation}
 
 \subsection{Psuedocode}
-Psuedocode for insertion and counting sort is presented below.
+Psuedocode for insertion and counting sort is presented in Fig. 1 and 2 below.
 
 \begin{figure}[H]
 \begin{algorithmic}
@@ -118,13 +118,13 @@ Psuedocode for insertion and counting sort is presented below.
 \caption{Counting sort pseudocode}
 \end{figure}
 
-The algorithm used to generate arrays of random integers takes a size, maximum/minimum value and `ordering' (i.e. sorted, reverse-sorted or random) as parameters. Pseudocode is outlined in Fig. \ref{data-gen-alg}.
+The algorithm used to generate arrays of random integers takes a size, maximum/minimum value and `ordering' (i.e. sorted, reverse-sorted or random) as parameters. The function implementing this algorithm can then be called with different parameters to produce appropriate data for each test. Pseudocode is outlined in Fig. \ref{data-gen-alg}.
 
 \begin{figure}[H]
 \begin{algorithmic}
 \STATE {\bf Algorithm} generateArray($A$, $n$, $min$, $max$, $ordering$)
 \STATE {\itshape Input}: Size $n$, maximum and minimum values $min$ and $max$, and ordering type $ordering$
-\STATE {\itshape Output}: Array $A$ containging $n$ integers
+\STATE {\itshape Output}: Array $A$ containing $n$ integers
 
 \FOR {$i \leftarrow 0$ {\bf to} $n-1$}
 	\STATE Generate random integer $r$ in range $[min, max]$
@@ -228,8 +228,6 @@ The full source code is included below. Other code used in the making of this re
 
 A debug version of the program can be compiled by defining \texttt{DEBUG} during compilation (alternatively, by running \texttt{make debug} if using the makefile in appendix A). In the debug version each array size is tested only once and some intermediate results are printed out.
 
-Some example printouts are included below.
-
 \subsection{Insertion Sort}
 
 Fig. \ref{ins-best-test} shows the progress of insertion sort in the best case, i.e. when the list to sort is already in the correct order. In this case the list is never changed, since the inner loop in the algorithm is never executed.
@@ -312,11 +310,11 @@ Sorted list is:
 
 \subsection{Counting Sort}
 
-An example of good performance with counting sort is shown in Fig. \ref{counting-good-test}. In this case we have $k=n$, i.e. the number of possible values is equal to the number of elements in the list (so the numbers are in the range 0 to 9 for a 10-element list).
+An example of good performance with counting sort is shown in Fig. \ref{counting-good-test}. In this case $k=n$, i.e. the number of possible values is equal to the number of elements in the list (so the numbers are in the range 0 to 9 for a 10-element list).
 
 Fig. \ref{counting-bad-test} shows an example of bad performance for counting sort. In this case $k=n^2$, so for a 4-element list there at 16 possible values, i.e. numbers are in the range 0 to 15.
 
-It is easily verified by looking at the original list in Fig. \ref{counting-good-test}, \ref{counting-bad-test} that the count and cumulative count arrays shows are correct.
+It is easily verified by looking at the original list in Fig. \ref{counting-good-test}, \ref{counting-bad-test} that the count and cumulative count arrays shown are correct.
 
 \begin{figure}[H]
 	\centering
@@ -359,7 +357,7 @@ To obtain run-time measurements for each algorithm/case combination the program 
 \footnotetext{The machine used was a Lenovo Yoga laptop, with 8GB memory and an Intel i3-4030U 1.90GHz processor.
 }
 
-To analyse the results a graph was plotted for each test. It is straightforward to verify that the run-time is linear by plotting $n$ against run-time and applying linear regression techniques to produce a line of best fit. It can then be visually verifed that the data points are approximately on this line.
+To analyse the results a graph was plotted for each test. It is straightforward to verify that the run-time is linear by plotting $n$ against run-time and applying linear regression techniques to produce a line of best fit. It can then be visually verified that the data points are approximately on this line.
 
 However if the run-time is not linear, say $O(n^2)$, simply plotting $n$ against run-time does not provide much insight. In this case one could not be certain that the resulting curve is not actually cubic, quartic  or even exponential, since the graphs of these types of functions look similar.
 
@@ -383,7 +381,7 @@ In Fig. \ref{insertion-best-graph}-\ref{counting-bad-graph} the red dots represe
 \results{counting}{bad}
 
 \section{Conclusions}
-The theoretical run-time performance of insertion sort is $O(n)$ in the best case and $O(n^2)$ in the average and worst cases. For counting sort $O(n)$ is considered to be an example of good performance and $O(n^2)$ to be an example of bad performance.
+As discussed in section 1, the theoretical run-time performance of insertion sort is $O(n)$ in the best case and $O(n^2)$ in the average and worst cases. For counting sort $O(n)$ is considered to be an example of good performance and $O(n^2)$ to be an example of bad performance.
 
 With this in mind, $n$ is plotted on the horizontal axis in Fig. \ref{insertion-best-graph} and \ref{counting-good-graph}, and $n^2$ on the horizontal in Fig. \ref{insertion-average-graph}, \ref{insertion-worst-graph} and \ref{counting-bad-graph}.
 

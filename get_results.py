@@ -165,6 +165,9 @@ for (alg, case), data in timings.items():
     # Set up plot layout
     fig, ax = plt.subplots(figsize=(16, 9))
 
+    # Prevent scientific notation being used on horizontal axis
+    ax.get_xaxis().get_major_formatter().set_scientific(False)
+
     ax.grid(True)
     plt.title("{} sort - {} {}".format(alg.title(), case_display_name.title(),
                                        desc),
